@@ -1,0 +1,7 @@
+*.bak
+*.dtsx.bak
+.vs/
+bin/
+obj/
+*.user
+*.suo
