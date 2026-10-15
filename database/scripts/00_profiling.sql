@@ -1,4 +1,4 @@
-USE Albarran_OLTP;
+USE Albarran;
 GO
 
 -- 1. Nulos por columna crítica
@@ -77,3 +77,20 @@ WHERE sueldo_base < 0;
 SELECT COUNT(*)
 FROM productos
 WHERE precio < 0;
+
+-- 7. Tipo de dato de la columna descuento
+SELECT
+    COUNT(*) AS total_registros,
+    SUM(CASE WHEN descuento = 0 THEN 1 ELSE 0 END) AS descuentos_cero,
+    SUM(CASE WHEN descuento <> 0 THEN 1 ELSE 0 END) AS descuentos_distintos_de_cero,
+    SUM(CASE WHEN descuento IS NULL THEN 1 ELSE 0 END) AS descuentos_nulos
+FROM detalle_ventas;
+
+SELECT
+    COLUMN_NAME,
+    DATA_TYPE,
+    NUMERIC_PRECISION,
+    NUMERIC_SCALE
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'detalle_ventas'
+  AND COLUMN_NAME = 'descuento';
