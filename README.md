@@ -1,15 +1,15 @@
 # Certamen 2 - Inteligencia de Negocios
 
 ## Caso seleccionado
-Mueblería Albarrán
+**Mueblería Albarrán**
 
 ## Integrantes y sección
 - Luis Sarzuri
 - Matías Fernández Vargas
 - Matías Aguilera
 
-- Sección: 300
-- Profesor: Hernan Saavedra Gonzalez
+- **Sección:** 300
+- **Profesor:** Hernan Saavedra Gonzalez
 
 ## Descripción del problema
 Mueblería Albarrán dispone de información transaccional sobre ventas, clientes, empleados, productos, sucursales y detalles de venta. Para facilitar el análisis comercial integrado, se organiza la información en un almacén dimensional que permite analizar las ventas por fecha, cliente, empleado, producto y sucursal. El trabajo considera el perfilamiento de los datos de origen, la construcción del modelo dimensional y la implementación de un proceso ETL.
@@ -54,25 +54,17 @@ Las dimensiones de cliente, empleado, producto y sucursal contienen un miembro d
 - **Medidas:** `Cantidad`, `PrecioUnitario`, `MontoBruto`, `MontoDescuento` y `MontoNeto`.
 - **Auditoría:** `FechaCarga`, `OrigenSistema` y `UsuarioCarga`.
 
+## Cubo OLAP - Fase 2
+Pendiente de implementación en esta fase. La Fase 2 contempla construir el cubo OLAP de acuerdo con las instrucciones del certamen.
+
+## Dashboard Power BI - Fase 2
+Pendiente de implementación en esta fase. La Fase 2 contempla desarrollar un dashboard en Power BI según los requisitos del certamen.
+
 ## Tecnologías utilizadas
 - Microsoft SQL Server.
 - SQL Server Management Studio (SSMS).
 - Visual Studio con SQL Server Integration Services (SSIS).
 - Git y GitHub.
-
-## Proceso ETL - Fase 1
-Pendiente.
-
-## Cubo OLAP - Fase 2
-Pendiente.
-
-## Dashboard Power BI - Fase 2
-Pendiente.
-
-## Tecnologías utilizadas
-- SQL Server 2019+
-- SQL Server Data Tools (SSDT) / Visual Studio con Integration Services
-- Git + GitHub
 
 ## Estructura del repositorio
 ```text
@@ -85,10 +77,13 @@ CERTAMEN2-BI/
 │   ├── informe/
 │   └── evidencias/
 ├── database/
-│   └── scripts/
-│       ├── 00_profiling.sql
-│       ├── 01_creacion_dw.sql
-│       └── 02_dim_tiempo.sql
+│   ├── scripts/
+│   │   ├── 00_profiling.sql
+│   │   ├── 01_creacion_dw.sql
+│   │   ├── 02_dim_tiempo.sql
+│   │   └── 03_validaciones.sql
+│   └── backup/
+│       └── Albarran_DW.bak
 └── etl/
     └── proyecto-ssis/
 
@@ -97,3 +92,6 @@ Pendiente.
 
 ## Distribución de responsabilidades y aportes
 Pendiente.
+
+## Presentación
+https://canva.link/s5xqy9642af6sjh
