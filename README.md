@@ -145,16 +145,13 @@ La estructura representa los archivos considerados para esta etapa. No se deben 
 Las consultas de validación y el respaldo del almacén dimensional se incorporarán al repositorio en una actualización posterior.
 
 ## Distribución de responsabilidades y aportes
-<<<<<<< HEAD
 Pendiente.
 
 ## Presentación
 https://canva.link/s5xqy9642af6sjh
-=======
 
 - **Luis Sarzuri:** perfilamiento y revisión de los datos de origen, además de aportes a las cargas de dimensiones.
 - **Matías Fernández Vargas:** estructura inicial del repositorio, documentación, enfoque Kimball y aportes al modelo dimensional y a `Dim_Tiempo`.
 - **Matías Aguilera:** desarrollo y pruebas de la carga de hechos, validaciones y conciliación; también participó en el desarrollo y las pruebas de las cargas de dimensiones.
 
 La distribución debe reflejar los aportes efectivamente realizados por cada integrante y los commits definitivos del equipo.
->>>>>>> 5fc4b62aecd2db9fe06a9c1c6506020764b0ace4
