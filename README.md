@@ -8,13 +8,8 @@
 - Matías Fernández Vargas
 - Matías Aguilera
 
-<<<<<<< HEAD
 - **Sección:** 300
-- **Profesor:** Hernan Saavedra Gonzalez
-=======
-**Sección:** 300  
-**Profesor:** Hernan Saavedra Gonzalez
->>>>>>> 5fc4b62aecd2db9fe06a9c1c6506020764b0ace4
+- **Profesor:** Hernán Saavedra Gonzalez
 
 ## Descripción del problema
 Mueblería Albarrán dispone de información transaccional sobre ventas, clientes, empleados, productos, sucursales y detalles de venta. Para facilitar el análisis comercial integrado, se organiza la información en un almacén dimensional que permite analizar las ventas por fecha, cliente, empleado, producto y sucursal.
@@ -75,8 +70,6 @@ Pendiente de implementación en esta fase. La Fase 2 contempla desarrollar un da
 - Visual Studio con SQL Server Integration Services (SSIS).
 - Git y GitHub.
 
-<<<<<<< HEAD
-=======
 ## Proceso ETL - Fase 1
 
 El paquete principal de Integration Services se denomina `Carga_Dimensiones.dtsx` y pertenece al proyecto `Carga_Dimensiones`.
@@ -101,7 +94,6 @@ Pendiente de implementación.
 ## Dashboard Power BI - Fase 2
 Pendiente de implementación.
 
->>>>>>> 5fc4b62aecd2db9fe06a9c1c6506020764b0ace4
 ## Estructura del repositorio
 
 ```text
