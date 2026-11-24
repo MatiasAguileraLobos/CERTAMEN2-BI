@@ -8,142 +8,222 @@
 - Matías Fernández Vargas
 - Matías Aguilera
 
-- **Sección:** 300
-- **Profesor:** Hernán Saavedra Gonzalez
+**Sección:** 300
+**Profesor:** Hernán Saavedra Gonzalez
+
+---
 
 ## Descripción del problema
-Mueblería Albarrán dispone de información transaccional sobre ventas, clientes, empleados, productos, sucursales y detalles de venta. Para facilitar el análisis comercial integrado, se organiza la información en un almacén dimensional que permite analizar las ventas por fecha, cliente, empleado, producto y sucursal.
 
-El proyecto considera el perfilamiento de los datos de origen, la construcción del modelo dimensional y la implementación de un proceso ETL mediante SQL Server Integration Services (SSIS).
+Mueblería Albarrán dispone de información transaccional sobre ventas, clientes, empleados, productos y sucursales. El proyecto organiza estos datos para facilitar el análisis comercial mediante un Data Warehouse dimensional, un proceso ETL, un cubo OLAP y dashboards en Power BI.
 
 ## Objetivo del proyecto
-Diseñar e implementar una primera versión de un Data Warehouse para Mueblería Albarrán mediante un modelo dimensional y un proceso ETL en SQL Server. La solución permite cargar las dimensiones y la tabla de hechos, conservar miembros desconocidos en las dimensiones correspondientes y preparar los datos para su posterior análisis.
+
+Implementar una solución de Inteligencia de Negocios que permita analizar las ventas desde las perspectivas de tiempo, cliente, empleado, producto y sucursal, apoyando la toma de decisiones comerciales.
 
 ## KPI definidos
 
-| Indicador | Definición |
-|---|---|
-| Monto bruto de ventas | Suma de `MontoBruto`. |
-| Monto de descuentos | Suma de `MontoDescuento`. |
-| Monto neto de ventas | Suma de `MontoNeto`. |
-| Cantidad vendida | Suma de `Cantidad`. |
-| Número de ventas | Conteo de valores distintos de `Venta_BK`. |
+| Indicador | Definición | Utilidad |
+|---|---|---|
+| Monto bruto de ventas | Suma de `MontoBruto`. | Comparar el valor de las ventas antes de descuentos. |
+| Monto de descuentos | Suma de `MontoDescuento`. | Cuantificar el efecto de los descuentos registrados. |
+| Monto neto de ventas | Suma de `MontoNeto`. | Analizar los ingresos después de descuentos. |
+| Cantidad vendida | Suma de `Cantidad`. | Identificar volumen de ventas por producto y segmento. |
+| Número de ventas | Conteo distinto de `Venta_BK`. | Comparar el número de transacciones entre períodos y segmentos. |
 
-La granularidad de la tabla de hechos es una línea de detalle de producto por venta. Por ello, el número de filas de `Fact_Ventas` no equivale necesariamente al número de ventas distintas. Las metas y los umbrales comerciales deberán definirse según los requerimientos del negocio.
+La granularidad de `Fact_Ventas` corresponde a una línea de detalle de producto por venta. Por lo tanto, las filas de la tabla de hechos no necesariamente equivalen a ventas distintas.
 
-**Nota sobre el descuento:** la columna de origen `detalle_ventas.descuento` contiene valores `0.00` en los registros revisados. No fue posible confirmar si representa un porcentaje o un importe monetario. Se conserva la interpretación implementada: `MontoDescuento = descuento` y `MontoNeto = MontoBruto - MontoDescuento`. Como los valores observados son cero, esto no altera los totales actuales.
+**Nota sobre descuentos:** los registros de origen revisados contienen valores `0.00`. Se conserva la interpretación implementada (`MontoDescuento = descuento` y `MontoNeto = MontoBruto - MontoDescuento`); no fue posible confirmar si el campo representa porcentaje o importe.
+
+---
 
 ## Modelo dimensional
 
-### Proceso de negocio
-Análisis de las ventas de muebles comercializados por Mueblería Albarrán, considerando las perspectivas de tiempo, cliente, empleado, producto y sucursal.
+### Proceso de negocio y granularidad
 
-### Granularidad
-**Una fila de `Fact_Ventas` representa una línea de detalle de un producto vendido dentro de una venta.** Una venta que incluye varios productos puede aparecer en varias filas.
+El proceso analizado corresponde a las ventas de muebles. Cada fila de `Fact_Ventas` representa una línea de detalle de un producto dentro de una venta.
 
 ### Dimensiones
-- **`Dim_Tiempo`:** fecha, año, semestre, trimestre, mes, nombre del mes, día, día de la semana e indicador de fin de semana.
-- **`Dim_Cliente`:** clave de negocio, nombre completo, sexo, fecha de nacimiento, estado civil y rango etario.
-- **`Dim_Empleado`:** clave de negocio, nombre completo, cargo, fecha de contrato y sueldo base.
-- **`Dim_Producto`:** clave de negocio, nombre, descripción, categoría y precio de lista.
-- **`Dim_Sucursal`:** clave de negocio, nombre de sucursal y comuna.
 
-Las dimensiones de cliente, empleado, producto y sucursal contienen un miembro desconocido con clave sustituta `-1` y `EsDesconocido = 1`. La dimensión tiempo utiliza `Tiempo_SK` con formato `YYYYMMDD` y contiene las fechas del año 2017.
+- **`Dim_Tiempo`:** fecha, año, semestre, trimestre, mes, día y atributos de calendario. Contiene las fechas de 2017; `Tiempo_SK` utiliza formato `YYYYMMDD`.
+- **`Dim_Cliente`:** clave de negocio, nombre, sexo, fecha de nacimiento, estado civil y rango etario.
+- **`Dim_Empleado`:** clave de negocio, nombre, cargo, fecha de contrato y sueldo base.
+- **`Dim_Producto`:** clave de negocio, nombre, descripción, categoría y precio de lista.
+- **`Dim_Sucursal`:** clave de negocio, nombre y comuna.
+
+Las dimensiones descriptivas incluyen un miembro desconocido con clave sustituta `-1`.
 
 ### Tabla de hechos y medidas
-`Fact_Ventas` contiene:
 
-- **Claves dimensionales:** `Tiempo_SK`, `Cliente_SK`, `Empleado_SK`, `Producto_SK` y `Sucursal_SK`.
-- **Identificación de venta:** `Venta_BK`, `TipoDocumento` y `NumeroDocumento`.
-- **Medidas:** `Cantidad`, `PrecioUnitario`, `MontoBruto`, `MontoDescuento` y `MontoNeto`.
-- **Auditoría:** `FechaCarga`, `OrigenSistema` y `UsuarioCarga`, según la definición de la tabla.
+`Fact_Ventas` contiene las claves de las dimensiones, `Venta_BK`, los datos del documento y las medidas `Cantidad`, `PrecioUnitario`, `MontoBruto`, `MontoDescuento` y `MontoNeto`.
 
-## Cubo OLAP - Fase 2
-Pendiente de implementación en esta fase. La Fase 2 contempla construir el cubo OLAP de acuerdo con las instrucciones del certamen.
-
-## Dashboard Power BI - Fase 2
-Pendiente de implementación en esta fase. La Fase 2 contempla desarrollar un dashboard en Power BI según los requisitos del certamen.
-
-## Tecnologías utilizadas
-- Microsoft SQL Server.
-- SQL Server Management Studio (SSMS).
-- Visual Studio con SQL Server Integration Services (SSIS).
-- Git y GitHub.
+---
 
 ## Proceso ETL - Fase 1
 
-El paquete principal de Integration Services se denomina `Carga_Dimensiones.dtsx` y pertenece al proyecto `Carga_Dimensiones`.
+El paquete `Carga_Dimensiones.dtsx`, del proyecto SSIS `Carga_Dimensiones`, realiza una recarga completa: limpia los datos de destino y carga las dimensiones de cliente, empleado, producto y sucursal antes de cargar `Fact_Ventas`.
 
-El flujo de control ejecuta una recarga completa mediante la tarea `SQL_Borrar_Datos_Destino` y después carga las dimensiones y la tabla de hechos en el siguiente orden:
+Utiliza componentes OLE DB Source y Destination, transformaciones Derived Column y tareas SQL.
 
-1. `DFT_Cargar_Dim_Cliente`
-2. `DFT_Cargar_Dim_Empleado`
-3. `DFT_Cargar_Dim_Producto`
-4. `DFT_Cargar_Dim_Sucursal`
-5. `DFT_Cargar_Fact_Ventas`
+Antes de ejecutar el paquete, revisar que las conexiones apunten a las bases `Albarran` y `Albarran_DW` correctas, ya que la limpieza elimina los datos cargados previamente.
 
-Las dimensiones se cargan antes de los hechos para que las claves sustitutas estén disponibles al insertar las ventas. La tarea de borrado elimina los datos cargados previamente de la tabla de hechos y de los miembros reales de las dimensiones correspondientes, conservando los miembros desconocidos.
-
-Se utilizan componentes OLE DB Source y OLE DB Destination, además de transformaciones de columna derivada cuando es necesario adaptar tipos de texto o preparar atributos.
-
-**Precaución:** el paquete utiliza una estrategia de recarga completa. Antes de ejecutarlo, se debe comprobar que las conexiones apunten a la base de datos `Albarran_DW` correcta, ya que la tarea de borrado elimina datos de destino. Las conexiones pueden requerir ajustes al abrir el proyecto en otro equipo.
+---
 
 ## Cubo OLAP - Fase 2
-Pendiente de implementación.
+
+### Proyecto y origen de datos
+
+El proyecto multidimensional SSAS `Albarran_OLAP` contiene el cubo de ventas `Cubo_Ventas_Albarran`, construido a partir de `Fact_Ventas` y las cinco dimensiones del modelo dimensional.
+
+El proyecto utiliza:
+
+- **Origen de datos:** `Albarran DW.ds`
+- **Vista del origen de datos:** `Vista_Albarran_DW.dsv`
+- **Data Warehouse:** `Albarran_DW`
+- **Servidor de Analysis Services:** instancia local
+
+La vista del origen de datos incorpora la tabla de hechos `Fact_Ventas` y las cinco dimensiones, estableciendo las relaciones mediante sus claves sustitutas.
+
+### Dimensiones del cubo
+
+El cubo incorpora las siguientes dimensiones:
+
+- Dim Tiempo
+- Dim Cliente
+- Dim Empleado
+- Dim Producto
+- Dim Sucursal
+
+Las dimensiones fueron generadas desde las tablas del Data Warehouse y procesadas correctamente.
+
+### Medidas del cubo
+
+El grupo de medidas `Fact Ventas` contiene las siguientes medidas:
+
+| Medida | Agregación | Descripción |
+|---|---|---|
+| Cantidad | Sum | Suma de unidades vendidas. |
+| Precio Unitario | AverageOfChildren | Promedio del precio unitario según la agregación configurada. |
+| Monto Bruto | Sum | Suma de los importes brutos de venta. |
+| Monto Descuento | Sum | Suma de los descuentos registrados. |
+| Monto Neto | Sum | Suma de los importes netos de venta. |
+| Recuento Fact Ventas | DistinctCount de `Venta_BK` | Conteo de ventas distintas por clave de negocio. |
+
+`Venta_BK` se conserva como clave de negocio y se usa para calcular el recuento distinto de ventas. El cubo también incluye recuentos distintos de clientes, productos, empleados y sucursales; estos consideran el miembro desconocido.
+
+### Asociación de dimensiones
+
+Las cinco dimensiones se relacionaron con el grupo de medidas `Fact Ventas` mediante relaciones regulares, utilizando las claves sustitutas que conectan la tabla de hechos con cada dimensión.
+
+Esto permite analizar las medidas del cubo desde las distintas perspectivas descriptivas y temporales del modelo.
+
+### Configuración de la dimensión Tiempo
+
+La dimensión `Dim_Tiempo` permite realizar análisis por año, semestre, trimestre, mes, nombre de mes, fecha, día, día de semana y fin de semana.
+
+No se definieron jerarquías personalizadas. Se conservaron los atributos temporales independientes y sus relaciones directas desde `Tiempo SK`, porque valores como Mes y Trimestre se repiten entre años y los intentos de jerarquía generaron problemas de configuración.
+
+Para permitir la ordenación cronológica de los meses en las visualizaciones, el atributo `Mes` se configuró utilizando:
+
+- **KeyColumns:** `Mes`
+- **NameColumn:** `NombreMes`
+
+De esta manera, el valor numérico del mes determina su orden, mientras que el nombre del mes es el valor mostrado al usuario. Esto permite visualizar los meses desde enero hasta diciembre en el orden esperado.
+
+### Implementación y procesamiento
+
+El proyecto SSAS se implementó en la instancia local de Analysis Services, creando la base de datos multidimensional `Albarran_OLAP`.
+
+Posteriormente, se realizó el procesamiento completo (`Process Full`) de las cinco dimensiones y del cubo, cargando los datos desde el Data Warehouse y construyendo las estructuras necesarias para las consultas multidimensionales.
+
+El procesamiento finalizó correctamente y sin errores.
+
+### Validación del cubo
+
+Se utilizó el Explorador del cubo de Visual Studio para validar las medidas y dimensiones mediante consultas multidimensionales.
+
+Se realizaron consultas de análisis, entre ellas:
+
+- Monto Neto por sucursal.
+- Monto Neto por mes.
+- Análisis temporal de ventas.
+- Consultas combinando medidas y atributos de dimensiones.
+- Validación de la disponibilidad de las medidas Cantidad y Recuento Fact Ventas.
+
+Los resultados obtenidos permitieron comprobar el funcionamiento del cubo, la disponibilidad de las medidas y la aplicación de las dimensiones como filtros y agrupaciones.
+
+---
 
 ## Dashboard Power BI - Fase 2
-Pendiente de implementación.
+
+El repositorio contiene dos versiones del dashboard:
+
+- `dashboard.pbix` utiliza una conexión dinámica (`Live Connection`) al cubo de Analysis Services local; requiere que SSAS y la base multidimensional estén disponibles.
+- `dashboard_portable.pbix` es una alternativa de uso y portabilidad, creada ante problemas de conexión al cubo OLAP.
+
+El dashboard permite explorar los indicadores de ventas desde las perspectivas comerciales del modelo.
+
+---
+
+## Tecnologías utilizadas
+
+- Microsoft SQL Server.
+- SQL Server Management Studio (SSMS).
+- SQL Server Integration Services (SSIS).
+- SQL Server Analysis Services (SSAS) Multidimensional.
+- Visual Studio.
+- Power BI Desktop.
+- Git y GitHub.
+
+---
 
 ## Estructura del repositorio
 
 ```text
 CERTAMEN2-BI/
 ├── README.md
-├── .gitignore
-├── docs/
-│   ├── modelo-dimensional/
-│   ├── presentacion/
-│   ├── informe/
-│   └── evidencias/
 ├── database/
 │   ├── scripts/
-│   │   ├── 00_profiling.sql
-│   │   ├── 01_creacion_dw.sql
-│   │   ├── 02_dim_tiempo.sql
-│   │   └── 03_validaciones.sql
 │   └── backup/
-│       └── Albarran_DW.bak
-└── etl/
-    └── Carga_Dimensiones/
-        ├── Carga_Dimensiones.sln
-        └── Carga_Dimensiones/
-            ├── Carga_Dimensiones.dtproj
-            ├── Carga_Dimensiones.dtsx
-            ├── Project.params
-            └── Carga_Dimensiones.database
+├── docs/
+│   ├── informe/
+│   └── presentacion/
+├── etl/
+│   └── Carga_Dimensiones/
+├── olap/
+│   └── Albarran_OLAP/
+│       └── Albarran_OLAP/
+└── powerbi/
+    ├── dashboard.pbix
+    └── dashboard_portable.pbix
 ```
 
-La estructura representa los archivos considerados para esta etapa. No se deben incluir carpetas temporales de Visual Studio como `.vs`, `bin` u `obj`, ni archivos locales `*.dtproj.user`.
+---
 
 ## Instrucciones de ejecución y revisión
 
-1. Ejecutar `01_creacion_dw.sql` en un entorno controlado para crear el almacén dimensional.
-2. Ejecutar `02_dim_tiempo.sql` para generar los registros de la dimensión tiempo.
-3. Abrir `Carga_Dimensiones.sln` en Visual Studio.
-4. Revisar y ajustar los administradores de conexión OLE DB para las bases `Albarran` y `Albarran_DW`.
-5. Confirmar que el destino corresponda al almacén dimensional correcto.
-6. Ejecutar el paquete `Carga_Dimensiones.dtsx` y comprobar el estado de las tareas.
+1. Ejecutar `database/scripts/01_creacion_dw.sql` y `02_dim_tiempo.sql` en SQL Server para crear y preparar el Data Warehouse.
+2. Configurar las conexiones del proyecto SSIS y ejecutar `Carga_Dimensiones.dtsx` desde Visual Studio.
+3. Abrir el proyecto SSAS `Albarran_OLAP` en Visual Studio.
+4. Revisar el origen de datos y verificar que las conexiones apunten a la instancia y base de datos correctas.
+5. Implementar (`Deploy`) el proyecto multidimensional en Analysis Services.
+6. Procesar las dimensiones y el cubo para cargar los datos.
+7. Utilizar el Explorador del cubo para realizar consultas y validar las medidas.
+8. Abrir el PBIX elegido en Power BI Desktop. Para `dashboard.pbix`, verificar la conexión a Analysis Services; actualizar los datos de `dashboard_portable.pbix` cuando corresponda.
+9. Utilizar `database/scripts/03_validaciones.sql` para revisar la carga dimensional.
 
-Las consultas de validación y el respaldo del almacén dimensional se incorporarán al repositorio en una actualización posterior.
+Las conexiones y propiedades del servidor pueden requerir ajustes al ejecutar el proyecto en otro equipo. Los respaldos disponibles se encuentran en `database/backup/`.
+
+---
 
 ## Distribución de responsabilidades y aportes
-Pendiente.
-
-## Presentación
-https://canva.link/s5xqy9642af6sjh
 
 - **Luis Sarzuri:** perfilamiento y revisión de los datos de origen, además de aportes a las cargas de dimensiones.
 - **Matías Fernández Vargas:** estructura inicial del repositorio, documentación, enfoque Kimball y aportes al modelo dimensional y a `Dim_Tiempo`.
-- **Matías Aguilera:** desarrollo y pruebas de la carga de hechos, validaciones y conciliación; también participó en el desarrollo y las pruebas de las cargas de dimensiones.
+- **Matías Aguilera:** desarrollo y pruebas de cargas ETL, validaciones y conciliación, además de aportes al cubo OLAP y dashboard Power BI.
 
-La distribución debe reflejar los aportes efectivamente realizados por cada integrante y los commits definitivos del equipo.
+---
+
+## Presentación
+
+[Presentación del proyecto en Canva](https://canva.link/s5xqy9642af6sjh)
