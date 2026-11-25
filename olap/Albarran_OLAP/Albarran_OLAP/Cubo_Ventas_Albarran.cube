@@ -396,6 +396,7 @@
               <ColumnID>Cantidad</ColumnID>
             </Source>
           </Source>
+          <FormatString>#,##0</FormatString>
         </Measure>
         <Measure dwd:design-time-name="ee7a2bd3-239d-4c12-a80f-7bfb3a6e5479">
           <ID>Precio Unitario</ID>
@@ -408,6 +409,7 @@
               <ColumnID>PrecioUnitario</ColumnID>
             </Source>
           </Source>
+          <FormatString>$#,##0;($#,##0);$0</FormatString>
         </Measure>
         <Measure dwd:design-time-name="04656425-0444-4f9a-84fa-884becea7486">
           <ID>Monto Bruto</ID>
@@ -419,6 +421,7 @@
               <ColumnID>MontoBruto</ColumnID>
             </Source>
           </Source>
+          <FormatString>$#,##0;($#,##0);$0</FormatString>
         </Measure>
         <Measure dwd:design-time-name="cceb0829-6bc6-4f3e-b49b-3dc93e6c1665">
           <ID>Monto Descuento</ID>
@@ -430,6 +433,7 @@
               <ColumnID>MontoDescuento</ColumnID>
             </Source>
           </Source>
+          <FormatString>$#,##0;($#,##0);$0</FormatString>
         </Measure>
         <Measure dwd:design-time-name="dd7167cb-39d7-4f74-a8ae-7e87fa41ece6">
           <ID>Monto Neto</ID>
@@ -441,6 +445,7 @@
               <ColumnID>MontoNeto</ColumnID>
             </Source>
           </Source>
+          <FormatString>$#,##0;($#,##0);$0</FormatString>
         </Measure>
         <Measure dwd:design-time-name="04fb7f59-01fd-4818-a03d-26c9acb76496">
           <ID>Recuento Fact Ventas</ID>
@@ -453,6 +458,7 @@
               <ColumnID>Venta_BK</ColumnID>
             </Source>
           </Source>
+          <FormatString>#,##0</FormatString>
         </Measure>
       </Measures>
       <StorageMode>Molap</StorageMode>
@@ -570,6 +576,7 @@
               <ColumnID>Cliente_SK</ColumnID>
             </Source>
           </Source>
+          <FormatString>#,##0</FormatString>
         </Measure>
       </Measures>
       <StorageMode>Molap</StorageMode>
@@ -686,6 +693,7 @@
               <ColumnID>Producto_SK</ColumnID>
             </Source>
           </Source>
+          <FormatString>#,##0</FormatString>
         </Measure>
       </Measures>
       <StorageMode>Molap</StorageMode>
@@ -731,6 +739,7 @@
               <ColumnID>Empleado_SK</ColumnID>
             </Source>
           </Source>
+          <FormatString>#,##0</FormatString>
         </Measure>
       </Measures>
       <StorageMode>Molap</StorageMode>
@@ -776,6 +785,7 @@
               <ColumnID>Sucursal_SK</ColumnID>
             </Source>
           </Source>
+          <FormatString>#,##0</FormatString>
         </Measure>
       </Measures>
       <StorageMode>Molap</StorageMode>
@@ -825,6 +835,7 @@ CREATE MEMBER CURRENTCUBE.[Measures].Venta_Promedio_por_Cliente
     NULL,
     [Measures].[Monto Neto] / [Measures].[Recuento distinto Cliente SK]
 ), 
+FORMAT_STRING = "$#,##0;($#,##0);$0", 
 VISIBLE = 1 ,  ASSOCIATED_MEASURE_GROUP = 'Fact Ventas'  ; </Text>
         </Command>
       </Commands>
