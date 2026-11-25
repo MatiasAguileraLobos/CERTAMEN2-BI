@@ -98,18 +98,23 @@ Las dimensiones fueron generadas desde las tablas del Data Warehouse y procesada
 
 ### Medidas del cubo
 
-El grupo de medidas `Fact Ventas` contiene las siguientes medidas:
+El grupo de medidas `Fact Ventas` contiene las siguientes medidas base:
 
-| Medida | Agregación | Descripción |
-|---|---|---|
-| Cantidad | Sum | Suma de unidades vendidas. |
-| Precio Unitario | AverageOfChildren | Promedio del precio unitario según la agregación configurada. |
-| Monto Bruto | Sum | Suma de los importes brutos de venta. |
-| Monto Descuento | Sum | Suma de los descuentos registrados. |
-| Monto Neto | Sum | Suma de los importes netos de venta. |
-| Recuento Fact Ventas | DistinctCount de `Venta_BK` | Conteo de ventas distintas por clave de negocio. |
+| Medida | Agregación | Formato | Descripción |
+|---|---|---|---|
+| Cantidad | Sum | `#,##0` | Suma de unidades vendidas. |
+| Precio Unitario | AverageOfChildren | `$#,##0;($#,##0);$0` | Promedio del precio unitario según la agregación configurada. |
+| Monto Bruto | Sum | `$#,##0;($#,##0);$0` | Suma de los importes brutos de venta. |
+| Monto Descuento | Sum | `$#,##0;($#,##0);$0` | Suma de los descuentos registrados. |
+| Monto Neto | Sum | `$#,##0;($#,##0);$0` | Suma de los importes netos de venta. |
+| Recuento Fact Ventas | DistinctCount de `Venta_BK` | `#,##0` | Conteo de ventas distintas por clave de negocio. |
 
-`Venta_BK` se conserva como clave de negocio y se usa para calcular el recuento distinto de ventas. El cubo también incluye recuentos distintos de clientes, productos, empleados y sucursales; estos consideran el miembro desconocido.
+Además, el cubo incorpora:
+
+- **Medida calculada MDX (`Venta_Promedio_por_Cliente`):** asociada a `Fact Ventas`, con formato `$#,##0;($#,##0);$0`. Divide `Monto Neto` por `Recuento distinto Cliente SK` protegiendo contra división por cero mediante `IIF`.
+- **Grupos de medidas complementarios (`DistinctCount`, formato `#,##0`):** `Clientes` (`Recuento distinto Cliente SK` sobre `Fact_Ventas`), `Dim Producto` (`Productos distintos`), `Dim Empleado` (`Recuento distinto Empleado SK`) y `Dim Sucursal` (`Recuento distinto Sucursal SK`). Los conteos calculados directamente sobre las tablas de dimensión consideran el miembro desconocido (`-1`).
+
+`Venta_BK` se conserva como clave de negocio y se usa para calcular el recuento distinto de ventas, evitando agregarla como suma.
 
 ### Asociación de dimensiones
 
@@ -156,12 +161,23 @@ Los resultados obtenidos permitieron comprobar el funcionamiento del cubo, la di
 
 ## Dashboard Power BI - Fase 2
 
-El repositorio contiene dos versiones del dashboard:
+El repositorio contiene dos versiones equivalentes del dashboard:
 
-- `dashboard.pbix` utiliza una conexión dinámica (`Live Connection`) al cubo de Analysis Services local; requiere que SSAS y la base multidimensional estén disponibles.
-- `dashboard_portable.pbix` es una alternativa de uso y portabilidad, creada ante problemas de conexión al cubo OLAP.
+- **`dashboard.pbix`:** utiliza una conexión dinámica (`Live Connection`) al cubo `Cubo_Ventas_Albarran` de la base `Albarran_OLAP` en la instancia local de Analysis Services; aprovecha directamente las medidas, formatos y cálculo MDX del cubo.
+- **`dashboard_portable.pbix`:** versión autocontenida con datos importados, creada para garantizar portabilidad y revisión en equipos sin SSAS local disponible.
 
-El dashboard permite explorar los indicadores de ventas desde las perspectivas comerciales del modelo.
+### Estructura y diseño visual
+
+Ambos dashboards incorporan un tema personalizado acorde a la identidad de **Mueblería Albarrán** (paleta cálida en tonos nogal, crema y terracota), encabezado unificado por página, etiquetas de datos visibles, filtros desplegables en la barra superior (`Sucursal`, `Categoría` y `Trimestre` según vista) y cuatro páginas de análisis:
+
+| Página | Tarjetas KPI | Visualizaciones principales |
+|---|---|---|
+| **Resumen General** | Monto Bruto, Descuentos, Monto Neto, N° de Ventas, Unidades Vendidas | Evolución mensual de ventas netas (orden cronológico enero–diciembre), ranking de productos por monto neto, ventas por día de la semana y ventas por trimestre (orden cronológico T1–T4). |
+| **Clientes** | Clientes Únicos, Monto Neto, Venta Prom. / Cliente (Live) / Unidades (Portable), N° de Ventas | Ranking de clientes por monto neto, monto neto por rango etario y gráficos de anillo por estado civil y sexo. |
+| **Productos** | Monto Neto, Unidades Vendidas, Precio Unit. Prom. (Live), Productos Distintos | Ranking de productos por monto neto y por unidades vendidas, ventas netas por categoría y tabla de detalle del catálogo. |
+| **Empleados y Sucursales** | Monto Neto, Sucursales, Empleados, Unidades Vendidas | Comparación de monto neto y número de ventas por sucursal y por empleado. |
+
+Para mayor detalle técnico sobre el cubo OLAP y los dashboards, revisar [docs/guia_olap_powerbi.md](docs/guia_olap_powerbi.md).
 
 ---
 
@@ -186,6 +202,7 @@ CERTAMEN2-BI/
 │   ├── scripts/
 │   └── backup/
 ├── docs/
+│   ├── guia_olap_powerbi.md
 │   ├── informe/
 │   └── presentacion/
 ├── etl/
@@ -219,8 +236,8 @@ Las conexiones y propiedades del servidor pueden requerir ajustes al ejecutar el
 ## Distribución de responsabilidades y aportes
 
 - **Luis Sarzuri:** perfilamiento y revisión de los datos de origen, además de aportes a las cargas de dimensiones.
-- **Matías Fernández Vargas:** estructura inicial del repositorio, documentación, enfoque Kimball y aportes al modelo dimensional y a `Dim_Tiempo`.
-- **Matías Aguilera:** desarrollo y pruebas de cargas ETL, validaciones y conciliación, además de aportes al cubo OLAP y dashboard Power BI.
+- **Matías Fernández Vargas:** estructura inicial del repositorio, documentación, enfoque Kimball, aportes al modelo dimensional y a `Dim_Tiempo`, además de refinamiento de formatos del cubo OLAP y rediseño visual de los dashboards en Power BI.
+- **Matías Aguilera:** desarrollo y pruebas de cargas ETL, validaciones y conciliación, además del desarrollo del cubo OLAP y construcción base del dashboard en Power BI.
 
 ---
 
