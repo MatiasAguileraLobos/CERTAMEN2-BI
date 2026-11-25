@@ -201,10 +201,6 @@ CERTAMEN2-BI/
 ├── database/
 │   ├── scripts/
 │   └── backup/
-├── docs/
-│   ├── guia_olap_powerbi.md
-│   ├── informe/
-│   └── presentacion/
 ├── etl/
 │   └── Carga_Dimensiones/
 ├── olap/
@@ -238,9 +234,3 @@ Las conexiones y propiedades del servidor pueden requerir ajustes al ejecutar el
 - **Luis Sarzuri:** perfilamiento y revisión de los datos de origen, además de aportes a las cargas de dimensiones.
 - **Matías Fernández Vargas:** estructura inicial del repositorio, documentación, enfoque Kimball, aportes al modelo dimensional y a `Dim_Tiempo`, además de refinamiento de formatos del cubo OLAP y rediseño visual de los dashboards en Power BI.
 - **Matías Aguilera:** desarrollo y pruebas de cargas ETL, validaciones y conciliación, además del desarrollo del cubo OLAP y construcción base del dashboard en Power BI.
-
----
-
-## Presentación
-
-[Presentación del proyecto en Canva](https://canva.link/s5xqy9642af6sjh)
